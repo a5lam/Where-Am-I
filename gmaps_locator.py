@@ -3,6 +3,9 @@
 import re
 import subprocess
 
+API_URL = 'https://www.googleapis.com/geolocation/v1/geolocate?key='
+API_KEY = 'AIzaSyDj9WzXgkec2LrD6zn05mn4M4EH4rLdKrM '
+
 # add wifi info to request if available
 payload = {'considerIp': 'true'}
 try:
@@ -23,3 +26,17 @@ else:
                           'signalStrength': str(int(signals[i][0]) / 2 - 100),
                           'channel': channels[i][1]})
     payload['wifiAccessPoints'] = wifi_list
+
+# make request via Google Maps API
+try:
+    response = requests.post(API_URL+API_KEY, json=payload)
+    data = response.json()
+    if 'error' in data.keys():
+        raise requests.RequestException('Error {0}: {1}'.format(data['error']['code'],data['error']['message']))
+except Exception as e:
+    print(e)
+else:
+    lat = data['location']['lat']
+    lng = data['location']['lng']
+    accuracy = data['accuracy']
+    print('You are within {0}m of {1}N {2}E'.format(accuracy, lat, lng))
